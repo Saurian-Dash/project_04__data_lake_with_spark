@@ -28,7 +28,7 @@ class SparkOperator:
 
         self.session = self.create_spark_session()
 
-    def clean_dataframe(self, df):
+    def clean_dataframe(self, df, **kwargs):
         """
         Docstring
         """
@@ -46,7 +46,7 @@ class SparkOperator:
 
         return df
 
-    def create_spark_session(self):
+    def create_spark_session(self, **kwargs):
         """
         Docstring
         """
@@ -67,7 +67,7 @@ class SparkOperator:
 
         return session
 
-    def execute_sql(self, df, query):
+    def execute_sql(self, df, query, **kwargs):
         """
         Docstring
         """
@@ -81,7 +81,8 @@ class SparkOperator:
                            output_path,
                            table_name,
                            partition,
-                           mode='overwrite'):
+                           mode='overwrite',
+                           **kwargs):
         """
         Docstring
         """
