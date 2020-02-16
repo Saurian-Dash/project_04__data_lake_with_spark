@@ -22,7 +22,7 @@ os.environ['AWS_SECRET_ACCESS_KEY'] = config.get(
 
 class SparkOperator:
     """
-    Docstring
+    TODO: Docstring
     """
     def __init__(self):
 
@@ -30,7 +30,7 @@ class SparkOperator:
 
     def clean_dataframe(self, df, **kwargs):
         """
-        Docstring
+        TODO: Docstring
         """
         # trim whitespace from all values
         for colname in df.columns:
@@ -40,25 +40,23 @@ class SparkOperator:
         for colname in df.columns:
             df = df.withColumn(
                 colname,
-                f.when(
-                    f.col(colname) == r'^\s*$', None).otherwise(f.col(colname))
+                f.when(f.col(colname) == r'^\s*$', None)
+                .otherwise(f.col(colname))
             )
 
         return df
 
     def create_spark_session(self, **kwargs):
         """
-        Docstring
+        TODO: Docstring
         """
         session = (
             SparkSession
             .builder
             .config(
                 'spark.jars.packages',
-                'org.apache.hadoop:hadoop-aws:2.7.0'
-            )
-            .getOrCreate()
-        )
+                'org.apache.hadoop:hadoop-aws:2.7.5'
+            ).getOrCreate())
 
         session.conf.set(
             'spark.sql.legacy.allowCreatingManagedTableUsingNonemptyLocation',
@@ -69,10 +67,27 @@ class SparkOperator:
 
     def execute_sql(self, df, query, **kwargs):
         """
-        Docstring
+        TODO: Docstring
         """
         df.createOrReplaceTempView('stage')
         df = self.session.sql(query)
+
+        return df
+
+    def stage_json_data(self,
+                        input_data,
+                        schema,
+                        query,
+                        table_name,
+                        **kwargs):
+        """
+        TODO: Docstring
+        """
+        df = self.session.read.json(input_data, schema)
+        df = self.clean_dataframe(df)
+        df = self.execute_sql(df=df, query=query)
+
+        df.createOrReplaceTempView(table_name)
 
         return df
 
@@ -84,7 +99,7 @@ class SparkOperator:
                            mode='overwrite',
                            **kwargs):
         """
-        Docstring
+        TODO: Docstring
         """
         try:
             (df.write
