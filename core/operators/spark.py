@@ -21,16 +21,22 @@ os.environ['AWS_SECRET_ACCESS_KEY'] = config.get(
 
 
 class SparkOperator:
-    """
-    TODO: Docstring
-    """
+
     def __init__(self):
 
         self.session = self.create_spark_session()
 
     def clean_dataframe(self, df, **kwargs):
         """
-        TODO: Docstring
+        Data cleaning function which removes leading and trailing whitespace
+        from DataFrame values, replacing empty strings with Python None. The
+        resulting clean DataFrame is returned as a new DataFrame.
+
+        Args:
+            df (pyspark.DataFrame): The Spark DataFrame to clean.
+
+        Returns:
+            pyspark.DataFrame
         """
         # trim whitespace from all values
         for colname in df.columns:
@@ -48,7 +54,15 @@ class SparkOperator:
 
     def create_spark_session(self, **kwargs):
         """
-        TODO: Docstring
+        TODO: Parametrize SparkSession config
+
+        Creates a SparkSession and attaches it to self. The SparkSession
+        enables the application to create and manipulate Spark DataFrames,
+        keeping track of any tables or temporary views created within the
+        session.
+
+        Returns:
+            pyspark.SparkSession
         """
         session = (
             SparkSession
@@ -67,7 +81,15 @@ class SparkOperator:
 
     def execute_sql(self, df, query, **kwargs):
         """
-        TODO: Docstring
+        Creates a temporary view of the input DataFrame and executes a SQL
+        query on it. The query results are returned as a new DataFrame.
+
+        Args:
+            df (pyspark.DataFrame): The DataFrame to execute a SQL query on.
+            query (str): The SQL query to execute on the DataFrame.
+
+        Returns:
+            pyspark.DataFrame
         """
         df.createOrReplaceTempView('stage')
         df = self.session.sql(query)
@@ -81,7 +103,17 @@ class SparkOperator:
                         table_name,
                         **kwargs):
         """
-        TODO: Docstring
+        TODO: Implement an os.walk to generate a list of filepaths for this
+        function to loop over.
+
+        Args:
+            input_data (str):
+            schema (pyspark.StuctType):
+            query (str):
+            table_name (str):
+
+        Returns:
+            pyspark.DataFrame
         """
         df = self.session.read.json(input_data, schema)
         df = self.clean_dataframe(df)
@@ -100,15 +132,21 @@ class SparkOperator:
                            **kwargs):
         """
         TODO: Docstring
+
+        Args:
+            df (pyspark.Dataframe):
+            output_path (str):
+            table_name (str):
+            partition: (tuple):
+            mode (str) [default='overwrite']:
         """
-        try:
-            (df.write
-               .partitionBy(partition)
-               .format('parquet')
-               .mode(mode)
-               .saveAsTable(table_name))
-        except Exception as e:
-            raise e
+        df.repartition(partition)
+        (df.write
+            .partitionBy(partition)
+            .saveAsTable(table_name,
+                         format='parquet',
+                         mode='overwrite',
+                         path=f'{output_path}/{table_name}'))
 
         logger.info(
             f'Files partioned by: {partition} | written to: {output_path}'
