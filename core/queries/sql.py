@@ -140,8 +140,8 @@ def create_fact_songplays():
             t1.user_agent AS user_agent
         FROM stage t1
         LEFT JOIN stage_song_data t2 ON
-            t2.artist_name = t1.artist
-            AND t2.title = t1.song
+            UCASE(t2.artist_name) = UCASE(t1.artist)
+            AND UCASE(t2.title) = UCASE(t1.song)
         WHERE t1.page = 'NextSong'
             AND t1.ts IS NOT NULL
         ORDER BY 1
