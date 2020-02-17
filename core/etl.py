@@ -17,7 +17,9 @@ from core.schema.json import schema_log_data, schema_song_data
 
 def process_song_data(sc, input_data, output_data):
     """
-    TODO: Docstring
+    ETL operation for the Sparkify song data. JSON data is loaded from S3,
+    staged in Spark DataFrames, transformed into a dimensional model and
+    saved to disk in parquet format.
     """
     # read json data into a staging table
     df = sc.stage_json_data(input_data=input_data,
@@ -54,7 +56,9 @@ def process_song_data(sc, input_data, output_data):
 
 def process_log_data(sc, input_data, output_data):
     """
-    TODO: Docstring
+    ETL operation for the Sparkify log data. JSON data is loaded from S3,
+    staged in Spark DataFrames, transformed into a dimensional model and
+    saved to disk in parquet format.
     """
     # read json data into a staging table
     df = sc.stage_json_data(input_data=input_data,
