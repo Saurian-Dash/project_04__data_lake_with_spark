@@ -6,9 +6,6 @@ from pyspark.sql.types import (
 
 
 def schema_log_data():
-    """
-    Docstring
-    """
 
     return StructType(
         [
@@ -35,9 +32,6 @@ def schema_log_data():
 
 
 def schema_song_data():
-    """
-    Docstring
-    """
 
     return StructType(
         [
