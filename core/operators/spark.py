@@ -143,14 +143,9 @@ class SparkOperator:
         """
         if time_partition:
             partition = ('year', 'month', 'day')
-            df = df.withColumn(
-                'date_col',
-                f.from_utc_timestamp(f.col(time_partition), 'YYYYMMddHH'))
-
-            (df.withColumn('year', f.year(f.col('date_col')))
-               .withColumn('month', f.month(f.col('date_col')))
-               .withColumn('day', f.dayofmonth(f.col('date_col')))
-               .drop('date_col')
+            (df.withColumn('year', f.year(f.col(time_partition)))
+               .withColumn('month', f.month(f.col(time_partition)))
+               .withColumn('day', f.dayofmonth(f.col(time_partition)))
                .write
                .format('parquet')
                .partitionBy(partition)

@@ -51,7 +51,7 @@ def process_song_data(sc, input_data, output_data):
     sc.write_parquet_files(df=clean_df,
                            output_path=output_data,
                            table_name='dim_artists',
-                           partition=('location', 'artist_name'))
+                           partition=('artist_name'))
 
 
 def process_log_data(sc, input_data, output_data):
@@ -86,7 +86,7 @@ def process_log_data(sc, input_data, output_data):
     sc.write_parquet_files(df=clean_df,
                            output_path=output_data,
                            table_name='dim_time',
-                           time_partition='start_time')
+                           partition=('year', 'month', 'day'))
 
     # extract columns from joined song and log datasets to create songplays
     clean_df = sc.execute_sql(df=df, query=create_fact_songplays())
