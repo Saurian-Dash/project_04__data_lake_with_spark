@@ -137,11 +137,12 @@ class SparkOperator:
             df (pyspark.Dataframe):
             output_path (str):
             table_name (str):
-            partition: (tuple) [default=None]:
-            time_partition (str) [default=None]:
-            mode (str) [default='overwrite']:
+            partition: (tuple):
+            time_partition (str):
+            mode (str):
         """
         if time_partition:
+            partition = ('year', 'month', 'day')
             df = df.withColumn(
                 'date_col',
                 f.from_utc_timestamp(f.col(time_partition), 'YYYYMMddHH'))
@@ -152,14 +153,9 @@ class SparkOperator:
                .drop('date_col')
                .write
                .format('parquet')
-               .partitionBy('year', 'month', 'day')
+               .partitionBy(partition)
                .option('path', os.path.join(output_path, table_name))
                .saveAsTable(table_name))
-
-            logger.info(
-                f'Files partioned by: year, month, day'
-                f' | written to: {output_path}'
-            )
         else:
             (df.write
                .format('parquet')
@@ -167,6 +163,6 @@ class SparkOperator:
                .option('path', os.path.join(output_path, table_name))
                .saveAsTable(table_name))
 
-            logger.info(
-                f'Files partioned by: {partition} | written to: {output_path}'
-            )
+        logger.info(
+            f'Files partioned by: {partition} | written to: {output_path}'
+        )
