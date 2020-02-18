@@ -103,9 +103,7 @@ def process_log_data(sc, input_data, output_data):
 
 
 def main():
-    """
-    TODO: Docstring
-    """
+
     sc = SparkOperator()
     # input_data = "s3a://udacity-dend/"
     # output_data = ""
