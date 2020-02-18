@@ -122,14 +122,14 @@ class SparkOperator:
 
         return df
 
-    def write_parquet_file(self,
-                           df,
-                           output_path,
-                           table_name,
-                           partition=None,
-                           time_partition=None,
-                           mode='overwrite',
-                           **kwargs):
+    def write_parquet_files(self,
+                            df,
+                            output_path,
+                            table_name,
+                            partition=None,
+                            time_partition=None,
+                            mode='overwrite',
+                            **kwargs):
         """
         TODO: Docstring
 
