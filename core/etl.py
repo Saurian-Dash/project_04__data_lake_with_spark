@@ -35,10 +35,10 @@ def process_song_data(sc, input_data, output_data):
                    query=profile_query(key='song_id'))
 
     # write songs table to parquet files partitioned by year and title
-    sc.write_parquet_file(df=clean_df,
-                          output_path=output_data,
-                          table_name='dim_songs',
-                          partition=('year', 'artist_id'))
+    sc.write_parquet_files(df=clean_df,
+                           output_path=output_data,
+                           table_name='dim_songs',
+                           partition=('year', 'title'))
 
     # run sql query to artists dimension
     clean_df = sc.execute_sql(df=df, query=create_dim_artists())
@@ -48,10 +48,10 @@ def process_song_data(sc, input_data, output_data):
                    query=profile_query(key='artist_id'))
 
     # write artists table to parquet files
-    sc.write_parquet_file(df=clean_df,
-                          output_path=output_data,
-                          table_name='dim_artists',
-                          partition=('artist_id'))
+    sc.write_parquet_files(df=clean_df,
+                           output_path=output_data,
+                           table_name='dim_artists',
+                           partition=('location', 'artist_name'))
 
 
 def process_log_data(sc, input_data, output_data):
@@ -74,19 +74,19 @@ def process_log_data(sc, input_data, output_data):
                    query=profile_query(key='user_id'))
 
     # write users table to parquet files
-    sc.write_parquet_file(df=clean_df,
-                          output_path=output_data,
-                          table_name='dim_users',
-                          partition=('gender', 'level'))
+    sc.write_parquet_files(df=clean_df,
+                           output_path=output_data,
+                           table_name='dim_users',
+                           partition=('level', 'gender'))
 
     # run sql query to clean time data
     clean_df = sc.execute_sql(df=df, query=create_dim_time())
 
     # write time table to parquet files
-    sc.write_parquet_file(df=clean_df,
-                          output_path=output_data,
-                          table_name='dim_time',
-                          time_partition='start_time')
+    sc.write_parquet_files(df=clean_df,
+                           output_path=output_data,
+                           table_name='dim_time',
+                           time_partition='start_time')
 
     # extract columns from joined song and log datasets to create songplays
     clean_df = sc.execute_sql(df=df, query=create_fact_songplays())
@@ -96,10 +96,10 @@ def process_log_data(sc, input_data, output_data):
                    query=songplay_test_query())
 
     # write songplays table to parquet files partitioned by year and month
-    sc.write_parquet_file(df=clean_df,
-                          output_path=output_data,
-                          table_name='fact_songplays',
-                          time_partition='start_time')
+    sc.write_parquet_files(df=clean_df,
+                           output_path=output_data,
+                           table_name='fact_songplays',
+                           time_partition='start_time')
 
 
 def main():
