@@ -6,7 +6,6 @@ from pyspark.sql import SparkSession
 
 import core.logger.log as log
 
-
 logger = log.setup_custom_logger(__name__)
 
 config = configparser.ConfigParser()
@@ -127,7 +126,8 @@ class SparkOperator:
                            df,
                            output_path,
                            table_name,
-                           partition,
+                           partition=None,
+                           time_partition=None,
                            mode='overwrite',
                            **kwargs):
         """
@@ -137,17 +137,36 @@ class SparkOperator:
             df (pyspark.Dataframe):
             output_path (str):
             table_name (str):
-            partition: (tuple):
+            partition: (tuple) [default=None]:
+            time_partition (str) [default=None]:
             mode (str) [default='overwrite']:
         """
-        df.repartition(partition)
-        (df.write
-            .partitionBy(partition)
-            .saveAsTable(table_name,
-                         format='parquet',
-                         mode='overwrite',
-                         path=f'{output_path}/{table_name}'))
+        if time_partition:
+            df = df.withColumn(
+                'date_col',
+                f.from_utc_timestamp(f.col(time_partition), 'YYYYMMddHH'))
 
-        logger.info(
-            f'Files partioned by: {partition} | written to: {output_path}'
-        )
+            (df.withColumn('year', f.year(f.col('date_col')))
+               .withColumn('month', f.month(f.col('date_col')))
+               .withColumn('day', f.dayofmonth(f.col('date_col')))
+               .drop('date_col')
+               .write
+               .format('parquet')
+               .partitionBy('year', 'month', 'day')
+               .option('path', os.path.join(output_path, table_name))
+               .saveAsTable(table_name))
+
+            logger.info(
+                f'Files partioned by: year, month, day'
+                f' | written to: {output_path}'
+            )
+        else:
+            (df.write
+               .format('parquet')
+               .partitionBy(partition)
+               .option('path', os.path.join(output_path, table_name))
+               .saveAsTable(table_name))
+
+            logger.info(
+                f'Files partioned by: {partition} | written to: {output_path}'
+            )
