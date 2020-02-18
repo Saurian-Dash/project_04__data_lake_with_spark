@@ -77,7 +77,7 @@ def process_log_data(sc, input_data, output_data):
     sc.write_parquet_files(df=clean_df,
                            output_path=output_data,
                            table_name='dim_users',
-                           partition=('level', 'gender'))
+                           partition=('gender', 'level'))
 
     # run sql query to clean time data
     clean_df = sc.execute_sql(df=df, query=create_dim_time())
