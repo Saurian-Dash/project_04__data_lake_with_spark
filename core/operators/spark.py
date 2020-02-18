@@ -32,7 +32,7 @@ class SparkOperator:
         resulting clean DataFrame is returned as a new DataFrame.
 
         Args:
-            df (pyspark.DataFrame): The Spark DataFrame to clean.
+            df (pyspark.DataFrame)
 
         Returns:
             pyspark.DataFrame
@@ -84,8 +84,11 @@ class SparkOperator:
         query on it. The query results are returned as a new DataFrame.
 
         Args:
-            df (pyspark.DataFrame): The DataFrame to execute a SQL query on.
-            query (str): The SQL query to execute on the DataFrame.
+            df (pyspark.DataFrame):
+                The Spark DataFrame to query.
+
+            query (str):
+                The SQL query to execute on the DataFrame.
 
         Returns:
             pyspark.DataFrame
@@ -131,30 +134,45 @@ class SparkOperator:
                             mode='overwrite',
                             **kwargs):
         """
-        TODO: Docstring
+        Writes a DataFrame to parquet files at the specified path and saves
+        the resulting table in the Spark session. Files will be partitioned
+        by the first column in the DataFrame if no partition argument is
+        provided.
 
         Args:
             df (pyspark.Dataframe):
+                The Spark DataFrame to write to parquet.
+
             output_path (str):
+                The filepath for written parquet files.
+
             table_name (str):
+                The name of the DataFrame to save.
+
             partition: (tuple):
+                DataFrame columns to partition the parquet files.
+
             time_partition (str):
+                To partition a DataFrame containing a UTF timestamp column by
+                year, month, and day, omit the partition argument and pass in
+                the name of that column.
+
             mode (str):
+                The write mode of the DataFrame writer. Defaults to 'overwrite'
         """
         if time_partition:
-            partition = ('year', 'month', 'day')
             (df.withColumn('year', f.year(f.col(time_partition)))
                .withColumn('month', f.month(f.col(time_partition)))
                .withColumn('day', f.dayofmonth(f.col(time_partition)))
                .write
                .format('parquet')
-               .partitionBy(partition)
+               .partitionBy('year', 'month', 'day')
                .option('path', os.path.join(output_path, table_name))
                .saveAsTable(table_name))
         else:
             (df.write
                .format('parquet')
-               .partitionBy(partition)
+               .partitionBy(partition if partition else df.schema.names[0])
                .option('path', os.path.join(output_path, table_name))
                .saveAsTable(table_name))
 

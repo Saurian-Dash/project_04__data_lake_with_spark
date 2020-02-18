@@ -108,7 +108,6 @@ def main():
     # input_data = "s3a://udacity-dend/"
     # output_data = ""
 
-    # TODO: replace with os.walk function to return a list of filepaths
     log_data = 'data/log-data/*.json'
     song_data = 'data/song-data/*/*/*/*.json'
 
