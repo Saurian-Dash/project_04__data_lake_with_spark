@@ -32,7 +32,8 @@ class SparkOperator:
         resulting clean DataFrame is returned as a new DataFrame.
 
         Args:
-            df (pyspark.DataFrame)
+            df (pyspark.DataFrame):
+                The Spark DataFrame to clean.
 
         Returns:
             pyspark.DataFrame
@@ -155,20 +156,26 @@ class SparkOperator:
             time_partition (str):
                 To partition a DataFrame containing a UTF timestamp column by
                 year, month, and day, omit the partition argument and pass in
-                the name of that column.
+                the name of the timestamp column.
 
             mode (str):
-                The write mode of the DataFrame writer. Defaults to 'overwrite'
+                The write mode of the DataFrame writer.
         """
         if time_partition:
-            (df.withColumn('year', f.year(f.col(time_partition)))
-               .withColumn('month', f.month(f.col(time_partition)))
-               .withColumn('day', f.dayofmonth(f.col(time_partition)))
-               .write
-               .format('parquet')
-               .partitionBy('year', 'month', 'day')
+            (df.write
+               .bucketBy(4, time_partition)
+               .sortBy(time_partition)
                .option('path', os.path.join(output_path, table_name))
-               .saveAsTable(table_name))
+               .saveAsTable('bucketed', format='parquet', mode='overwrite'))
+        # if time_partition:
+        #     (df.withColumn('year', f.year(f.col(time_partition)))
+        #        .withColumn('month', f.month(f.col(time_partition)))
+        #        .withColumn('day', f.dayofmonth(f.col(time_partition)))
+        #        .write
+        #        .format('parquet')
+        #        .partitionBy('year', 'month', 'day')
+        #        .option('path', os.path.join(output_path, table_name))
+        #        .saveAsTable(table_name))
         else:
             (df.write
                .format('parquet')
