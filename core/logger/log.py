@@ -1,7 +1,7 @@
 import logging
 
 
-LEVEL = 'DEBUG'
+LEVEL = 'INFO'
 FORMAT = (
     '%(asctime)s | Module: %(module)s | Function: %(funcName)s | %(message)s'
 )

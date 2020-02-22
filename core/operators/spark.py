@@ -38,11 +38,9 @@ class SparkOperator:
         Returns:
             pyspark.DataFrame
         """
-        # trim whitespace from all values
         for colname in df.columns:
             df = df.withColumn(colname, f.trim(f.col(colname)))
 
-        # replace empty values with None
         for colname in df.columns:
             df = df.withColumn(
                 colname,
@@ -54,8 +52,6 @@ class SparkOperator:
 
     def create_spark_session(self, **kwargs):
         """
-        TODO: Parametrize SparkSession config
-
         Creates a SparkSession and attaches it to self. The SparkSession
         enables the application to create and manipulate Spark DataFrames,
         keeping track of any tables or temporary views created within the
@@ -99,9 +95,10 @@ class SparkOperator:
         Returns:
             pyspark.DataFrame
         """
+        logger.info(f'Creating staging table: {df}')
         df.createOrReplaceTempView('stage')
 
-        logger.info(f'DataFrame: {df} | Executing SQL: \n{query}\n')
+        logger.info(f'Executing SQL: \n{query}')
         df = self.session.sql(query)
 
         return df
@@ -113,14 +110,25 @@ class SparkOperator:
                         table_name,
                         **kwargs):
         """
-        TODO: Implement an os.walk to generate a list of filepaths for this
-        function to loop over.
+        Reads input data files from the specified path with the speficied file
+        extension into a Spark DataFrame. The specified Spark SQL query is
+        excuted to clean the DataFrame and the result is saved to the current
+        Spark session and returned as a new DataFrame.
 
         Args:
-            input_data (str):
+            input_data (str) | (list):
+                Input filepath or directory path containg the input data, you
+                may pass in the path to a single file or a path to a directory
+                containing many files.
+
             schema (pyspark.StuctType):
+                Spark schema describing the structure of the input data.
+
             query (str):
+                Spark SQL query to execute to clean the input data.
+
             table_name (str):
+                The name of the table to stage in a temporary view.
 
         Returns:
             pyspark.DataFrame
@@ -155,7 +163,7 @@ class SparkOperator:
             table_name (str):
                 The name of the DataFrame to save.
 
-            partition: (tuple):
+            partition (tuple):
                 DataFrame columns to partition the parquet files.
 
             mode (str):
