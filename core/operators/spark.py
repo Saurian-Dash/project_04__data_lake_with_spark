@@ -69,12 +69,17 @@ class SparkOperator:
             .builder
             .config(
                 'spark.jars.packages',
-                'org.apache.hadoop:hadoop-aws:2.7.5'
+                'org.apache.hadoop:hadoop-aws:2.7.5',
             ).getOrCreate())
 
         session.conf.set(
             'spark.sql.legacy.allowCreatingManagedTableUsingNonemptyLocation',
-            'true'
+            'true',
+        )
+
+        session._jsc.hadoopConfiguration().set(
+            'mapreduce.fileoutputcommitter.algorithm.version',
+            '2',
         )
 
         return session
@@ -95,6 +100,8 @@ class SparkOperator:
             pyspark.DataFrame
         """
         df.createOrReplaceTempView('stage')
+
+        logger.info(f'DataFrame: {df} | Executing SQL: \n{query}\n')
         df = self.session.sql(query)
 
         return df
@@ -131,14 +138,12 @@ class SparkOperator:
                             output_path,
                             table_name,
                             partition=None,
-                            time_partition=None,
                             mode='overwrite',
                             **kwargs):
         """
-        Writes a DataFrame to parquet files at the specified path and saves
-        the resulting table in the Spark session. Files will be partitioned
-        by the first column in the DataFrame if no partition argument is
-        provided.
+        Writes a DataFrame to the specified path as parquet files, partitioned
+        by the specified columns. The resulting table is saved to the current
+        Spark session so that it can be referenced later if needed.
 
         Args:
             df (pyspark.Dataframe):
@@ -153,35 +158,18 @@ class SparkOperator:
             partition: (tuple):
                 DataFrame columns to partition the parquet files.
 
-            time_partition (str):
-                To partition a DataFrame containing a UTF timestamp column by
-                year, month, and day, omit the partition argument and pass in
-                the name of the timestamp column.
-
             mode (str):
                 The write mode of the DataFrame writer.
         """
-        if time_partition:
+        if partition:
             (df.write
-               .bucketBy(4, time_partition)
-               .sortBy(time_partition)
+               .partitionBy(partition)
                .option('path', os.path.join(output_path, table_name))
-               .saveAsTable('bucketed', format='parquet', mode='overwrite'))
-        # if time_partition:
-        #     (df.withColumn('year', f.year(f.col(time_partition)))
-        #        .withColumn('month', f.month(f.col(time_partition)))
-        #        .withColumn('day', f.dayofmonth(f.col(time_partition)))
-        #        .write
-        #        .format('parquet')
-        #        .partitionBy('year', 'month', 'day')
-        #        .option('path', os.path.join(output_path, table_name))
-        #        .saveAsTable(table_name))
+               .saveAsTable(table_name, format='parquet', mode=mode))
         else:
             (df.write
-               .format('parquet')
-               .partitionBy(partition if partition else df.schema.names[0])
                .option('path', os.path.join(output_path, table_name))
-               .saveAsTable(table_name))
+               .saveAsTable(table_name, format='parquet', mode=mode))
 
         logger.info(
             f'Files partioned by: {partition} | written to: {output_path}'
