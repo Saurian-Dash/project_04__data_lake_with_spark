@@ -1,20 +1,20 @@
 import glob
 import os
 
-import core.logger.log as log
-from core.operators.spark import SparkOperator
-from core.queries.sql import (
-     create_dim_artists,
-     create_dim_songs,
-     create_fact_songplays,
-     create_dim_time,
-     create_dim_users,
-     profile_query,
-     songplay_test_query,
-     stage_log_data,
-     stage_song_data,
+import biapp.core.logger.log as log
+from biapp.core.operators.spark import SparkOperator
+from biapp.core.queries.sql import (
+    create_dim_artists,
+    create_dim_songs,
+    create_dim_time,
+    create_dim_users,
+    create_fact_songplays,
+    profile_query,
+    songplay_test_query,
+    stage_log_data,
+    stage_song_data,
 )
-from core.schema.json import schema_log_data, schema_song_data
+from biapp.core.schema.json import schema_log_data, schema_song_data
 
 
 logger = log.setup_custom_logger(__name__)
@@ -58,23 +58,21 @@ def process_song_data(spark, input_data, output_data):
     clean_df = spark.execute_sql(df=df, query=create_dim_songs())
 
     # profiling query: check for duplicate song_id
-    spark.execute_sql(
-        df=clean_df, query=profile_query(key='song_id')
-    ).show(1)
+    spark.execute_sql(df=clean_df,
+                      query=profile_query(key='song_id')).show(1)
 
-    # write songs table to parquet files partitioned by year and title
+    # write songs table to parquet files partitioned by year and artist
     spark.write_parquet_files(df=clean_df,
                               output_path=output_data,
                               table_name='dim_songs',
-                              partition=('year', 'artist_id'))
+                              partition=('year', 'artist_name'))
 
     # run sql query to artists dimension
     clean_df = spark.execute_sql(df=df, query=create_dim_artists())
 
     # profiling query: check for duplicate artist_id
-    spark.execute_sql(
-        df=clean_df, query=profile_query(key='artist_id')
-    ).show(1)
+    spark.execute_sql(df=clean_df,
+                      query=profile_query(key='artist_id')).show(1)
 
     # write artists table to parquet files
     spark.write_parquet_files(df=clean_df,
@@ -99,9 +97,8 @@ def process_log_data(spark, input_data, output_data):
     clean_df = spark.execute_sql(df=df, query=create_dim_users())
 
     # profiling query: check for duplicate user_id
-    spark.execute_sql(
-        df=clean_df, query=profile_query(key='user_id')
-    ).show(1)
+    spark.execute_sql(df=clean_df,
+                      query=profile_query(key='user_id')).show(1)
 
     # write users table to parquet files
     spark.write_parquet_files(df=clean_df,
@@ -119,14 +116,13 @@ def process_log_data(spark, input_data, output_data):
                               partition=('year', 'month'))
 
     # extract columns from joined song and log datasets to create songplays
-    clean_df = spark.execute_sql(df=df, query=create_fact_songplays())
+    clean_df = spark.execute_sql(df=df,  query=create_fact_songplays())
 
     # profiling query: count populated song_id
-    spark.execute_sql(
-        df=clean_df, query=songplay_test_query()
-    ).show(1)
+    spark.execute_sql(df=clean_df,
+                      query=songplay_test_query()).show(1)
 
-    # write songplays table to parquet files partitioned by year, month and day
+    # write songplays table to parquet files partitioned by year, month, day
     spark.write_parquet_files(df=clean_df,
                               output_path=output_data,
                               table_name='fact_songplays',

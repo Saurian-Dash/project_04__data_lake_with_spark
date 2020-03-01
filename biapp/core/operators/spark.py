@@ -1,22 +1,18 @@
-import configparser
 import os
 
 from pyspark.sql import functions as f
 from pyspark.sql import SparkSession
 
-import core.logger.log as log
+import biapp.core.logger.log as log
+from biapp.settings.config import (
+    AWS_ACCESS_KEY_ID,
+    AWS_SECRET_ACCESS_KEY,
+)
 
 logger = log.setup_custom_logger(__name__)
 
-config = configparser.ConfigParser()
-config.read('settings/envs.cfg')
-
-os.environ['AWS_ACCESS_KEY_ID'] = config.get(
-    'AWS', 'AWS_ACCESS_KEY_ID'
-)
-os.environ['AWS_SECRET_ACCESS_KEY'] = config.get(
-    'AWS', 'AWS_SECRET_ACCESS_KEY'
-)
+os.environ['AWS_ACCESS_KEY_ID'] = AWS_ACCESS_KEY_ID
+os.environ['AWS_SECRET_ACCESS_KEY'] = AWS_SECRET_ACCESS_KEY
 
 
 class SparkOperator:
@@ -25,7 +21,7 @@ class SparkOperator:
 
         self.session = self.create_spark_session()
 
-    def clean_dataframe(self, df, **kwargs):
+    def clean_dataframe(self, df, *args, **kwargs):
         """
         Data cleaning function which removes leading and trailing whitespace
         from DataFrame values, replacing empty strings with Python None. The
@@ -50,7 +46,7 @@ class SparkOperator:
 
         return df
 
-    def create_spark_session(self, **kwargs):
+    def create_spark_session(self, *args, **kwargs):
         """
         Creates a SparkSession and attaches it to self. The SparkSession
         enables the application to create and manipulate Spark DataFrames,
@@ -80,7 +76,7 @@ class SparkOperator:
 
         return session
 
-    def execute_sql(self, df, query, **kwargs):
+    def execute_sql(self, df, query, *args, **kwargs):
         """
         Creates a temporary view of the input DataFrame and executes a SQL
         query on it. The query results are returned as a new DataFrame.
@@ -95,11 +91,10 @@ class SparkOperator:
         Returns:
             pyspark.DataFrame
         """
-        logger.info(f'Creating staging table: {df}')
         df.createOrReplaceTempView('stage')
 
-        logger.info(f'Executing SQL: \n{query}')
-        df = self.session.sql(query)
+        logger.info(f"Executing SQL: {query['name']} \n{query['sql']}")
+        df = self.session.sql(query['sql'])
 
         return df
 
@@ -108,12 +103,12 @@ class SparkOperator:
                         schema,
                         query,
                         table_name,
+                        *args,
                         **kwargs):
         """
-        Reads input data files from the specified path with the speficied file
-        extension into a Spark DataFrame. The specified Spark SQL query is
-        excuted to clean the DataFrame and the result is saved to the current
-        Spark session and returned as a new DataFrame.
+        Reads input data files from the specified path with the specified file
+        extension into a Spark DataFrame. The specified SQL query is excuted
+        to clean the DataFrame and the result is returned as a new DataFrame.
 
         Args:
             input_data (str) | (list):
@@ -147,11 +142,12 @@ class SparkOperator:
                             table_name,
                             partition=None,
                             mode='overwrite',
+                            *args,
                             **kwargs):
         """
         Writes a DataFrame to the specified path as parquet files, partitioned
-        by the specified columns. The resulting table is saved to the current
-        Spark session so that it can be referenced later if needed.
+        by the specified columns. If no partition is provided, the Dataframe
+        will be coalesced to a single file.
 
         Args:
             df (pyspark.Dataframe):
@@ -170,15 +166,19 @@ class SparkOperator:
                 The write mode of the DataFrame writer.
         """
         if partition:
-            (df.write
-               .partitionBy(partition)
-               .option('path', os.path.join(output_path, table_name))
-               .saveAsTable(table_name, format='parquet', mode=mode))
+            (df.repartition(*partition)
+               .write
+               .mode(mode)
+               .partitionBy(*partition)
+               .parquet(os.path.join(output_path, table_name)))
         else:
-            (df.write
-               .option('path', os.path.join(output_path, table_name))
-               .saveAsTable(table_name, format='parquet', mode=mode))
+            (df.coalesce(1)
+               .write
+               .mode(mode)
+               .parquet(os.path.join(output_path, table_name)))
 
         logger.info(
-            f'Files partioned by: {partition} | written to: {output_path}'
+            f'Table: {table_name}'
+            f' | partioned by: {partition}'
+            f' | written to: {output_path}'
         )

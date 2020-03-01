@@ -1,9 +1,9 @@
-from core.etl import main as etl
+from biapp.core.deploy import main as deploy
 
 
 def main():
 
-    etl()
+    deploy()
 
 
 if __name__ == '__main__':
