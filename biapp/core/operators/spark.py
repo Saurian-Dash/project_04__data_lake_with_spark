@@ -4,15 +4,8 @@ from pyspark.sql import functions as f
 from pyspark.sql import SparkSession
 
 import biapp.core.logger.log as log
-from biapp.settings.config import (
-    AWS_ACCESS_KEY_ID,
-    AWS_SECRET_ACCESS_KEY,
-)
 
 logger = log.setup_custom_logger(__name__)
-
-os.environ['AWS_ACCESS_KEY_ID'] = AWS_ACCESS_KEY_ID
-os.environ['AWS_SECRET_ACCESS_KEY'] = AWS_SECRET_ACCESS_KEY
 
 
 class SparkOperator:

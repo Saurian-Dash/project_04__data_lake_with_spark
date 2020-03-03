@@ -2,10 +2,8 @@ import boto3
 
 import biapp.core.logger.log as log
 from biapp.settings.config import (
-    AWS_ACCESS_KEY_ID,
     AWS_REGION,
     AWS_ROLE,
-    AWS_SECRET_ACCESS_KEY,
     EMR_CONFIG,
     S3_CODE_PATH,
     S3_INPUT_DATA,
@@ -23,13 +21,7 @@ class EMROperator:
 
     def create_emr_client(self):
 
-        client = boto3.client(
-            'emr',
-            region_name=AWS_REGION,
-            aws_access_key_id=AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-        )
-
+        client = boto3.client('emr', region_name=AWS_REGION)
         logger.info('Client created')
 
         return client
@@ -121,5 +113,6 @@ class EMROperator:
             ServiceRole=AWS_ROLE
         )
 
-        print('cluster created with the step...', response['JobFlowId'])
+        logger.info(f"Cluster ID: {response['JobFlowId']} created")
+
         return response

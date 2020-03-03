@@ -8,10 +8,8 @@ from biapp.settings.aws_policies import (
     S3_FULL_ACCESS,
 )
 from biapp.settings.config import (
-    AWS_ACCESS_KEY_ID,
     AWS_REGION,
     AWS_ROLE,
-    AWS_SECRET_ACCESS_KEY,
 )
 
 logger = log.setup_custom_logger(__name__)
@@ -47,12 +45,7 @@ class IAMOperator:
         Returns:
             boto3.client
         """
-        client = boto3.client(
-            service_name='iam',
-            region_name=AWS_REGION,
-            aws_access_key_id=AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-        )
+        client = boto3.client(service_name='iam', region_name=AWS_REGION)
 
         logger.info('Client created')
 

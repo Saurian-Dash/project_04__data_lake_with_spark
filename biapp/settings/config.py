@@ -6,9 +6,7 @@ config = configparser.ConfigParser()
 config.read('biapp/settings/envs.cfg')
 
 # aws credentials
-AWS_ACCESS_KEY_ID = config.get('AWS', 'AWS_ACCESS_KEY_ID')
 AWS_REGION = config.get('AWS', 'AWS_REGION')
-AWS_SECRET_ACCESS_KEY = config.get('AWS', 'AWS_SECRET_ACCESS_KEY')
 AWS_ROLE = config.get('AWS', 'AWS_ROLE')
 
 # emr credentials

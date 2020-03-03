@@ -1,4 +1,4 @@
-from biapp.core.deploy import main as deploy
+from biapp.deploy import main as deploy
 
 
 def main():
