@@ -1,15 +1,18 @@
 import configparser as configparser
+import os
 
-
-# read config file
 config = configparser.ConfigParser()
-config.read('biapp/settings/envs.cfg')
 
-# aws credentials
+# read envs.cfg file in this directory
+this_dir = os.path.dirname(os.path.abspath(__file__))
+cfg_file = os.path.join(this_dir, 'envs.cfg')
+config.read(cfg_file)
+
+# aws settings
 AWS_REGION = config.get('AWS', 'AWS_REGION')
 AWS_ROLE = config.get('AWS', 'AWS_ROLE')
 
-# emr credentials
+# emr settings
 EMR_INSTANCE_TYPE = config.get('EMR', 'EMR_INSTANCE_TYPE')
 EMR_LOG_URI = config.get('EMR', 'EMR_LOG_URI')
 EMR_MARKET = config.get('EMR', 'EMR_MARKET')
@@ -26,6 +29,7 @@ EMR_CONFIG = {
 }
 
 # s3 data lake
+S3_DATA_LAKE = config.get('S3_DATA_LAKE', 'S3_DATA_LAKE')
 S3_INPUT_DATA = config.get('S3_DATA_LAKE', 'S3_INPUT_DATA')
 S3_OUTPUT_DATA = config.get('S3_DATA_LAKE', 'S3_OUTPUT_DATA')
 

@@ -3,7 +3,7 @@ import json
 
 from biapp.core.logger import log
 from biapp.settings.aws_policies import (
-    EMR_SERVICE,
+    EMR_FULL_ACCESS,
     EMR_TRUST_RELATIONSHIP,
     S3_FULL_ACCESS,
 )
@@ -21,7 +21,7 @@ class IAMOperator:
 
         self._dwh_role_arn = None
         self._dwh_role_id = None
-        self.aws_role_policies = [EMR_SERVICE, S3_FULL_ACCESS]
+        self.aws_role_policies = [EMR_FULL_ACCESS, S3_FULL_ACCESS]
         self.dwh_db_role = AWS_ROLE
         self.dwh_trust_policy = EMR_TRUST_RELATIONSHIP
         self.client = self.create_iam_client()
@@ -119,8 +119,7 @@ class IAMOperator:
     def detach_role_policies(self):
         """
         Detach the policies from the data warehouse role associated with this
-        application. This function is invoked from the teardown() method of
-        this class when the application is in `dry_run` mode.
+        application.
 
         Returns:
             list
@@ -133,20 +132,16 @@ class IAMOperator:
                     RoleName=self.dwh_db_role,
                     PolicyArn=policy['arn'],
                 )
+                logger.info(f"'{policy['name']}' detached")
+                responses.append(response)
             except self.client.exceptions.NoSuchEntityException:
                 logger.info(f"'{policy['name']}' already detached!")
-
-            logger.info(f"'{policy['name']}' detached")
-            responses.append(response)
 
         return responses
 
     def delete_dwh_role(self):
         """
-        Deletes the data warehouse role created by this application. This
-        function is invoked from the teardown() method of this class which
-        tears down the AWS infrastructure when the ETL operation completes
-        in `dry_run` mode.
+        Deletes the data warehouse role created by this application.
 
         Returns:
             json
@@ -161,17 +156,3 @@ class IAMOperator:
         logger.info(f"'{self.dwh_db_role}' deleted")
 
         return response
-
-    def teardown(self):
-        """
-        Detaches the policies from the application's data warehouse role then
-        deletes it. This function is executed when the application is in
-        `dry_run` mode; the AWS infrastructure is torn down upon completion.
-
-        Returns:
-            None
-        """
-        self.detach_role_policies()
-        self.delete_dwh_role()
-
-        logger.info('Teardown completed')

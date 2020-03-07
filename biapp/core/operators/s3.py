@@ -40,24 +40,42 @@ class S3Operator:
     def deploy_code(self, bucket):
 
         directory = f'{os.path.join(os.getcwd())}{os.sep}'
+        extensions = ('cfg', 'py')
 
         try:
-            for root, subdirs, files in os.walk(directory):
-                files = glob.glob(os.path.join(root, f'*.py'))
+            for ext in extensions:
 
-                for f in files:
-                    relative_path = root.replace(directory, '')
-                    filename = os.path.basename(f)
-                    s3_path = os.path.join(relative_path, filename)
-                    s3_path = s3_path.replace(os.sep, '/')
+                for root, subdirs, files in os.walk(directory):
+                    files = glob.glob(os.path.join(root, f'*.{ext}'))
 
-                    self.client.upload_file(
-                        os.path.join(root, f),
-                        bucket,
-                        s3_path,
-                    )
+                    for f in files:
+                        relative_path = root.replace(directory, '')
+                        filename = os.path.basename(f)
+                        s3_path = os.path.join(relative_path, filename)
+                        s3_path = s3_path.replace(os.sep, '/')
 
-                    logger.info(f'{s3_path} written to S3')
+                        self.client.upload_file(
+                            os.path.join(root, f),
+                            bucket,
+                            s3_path,
+                        )
+
+                        logger.info(f'{s3_path} written to S3')
 
         except Exception as err:
             raise(err)
+
+    def list_bucket(self, bucket, prefix=''):
+
+        response = self.client.list_objects_v2(
+            Bucket=bucket,
+            Delimiter='',
+            EncodingType='url',
+            MaxKeys=10,
+            Prefix=prefix,
+            FetchOwner=False,
+            RequestPayer='requester'
+        )
+
+        if response:
+            return response['Contents']

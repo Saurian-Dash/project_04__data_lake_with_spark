@@ -15,6 +15,11 @@ from biapp.core.queries.sql import (
     stage_song_data,
 )
 from biapp.core.schema.json import schema_log_data, schema_song_data
+from biapp.settings.config import (
+    S3_DATA_LAKE,
+    S3_INPUT_DATA,
+    S3_OUTPUT_DATA
+)
 
 
 logger = log.setup_custom_logger(__name__)
@@ -47,6 +52,10 @@ def process_song_data(spark, input_data, output_data):
     staged in Spark DataFrames, transformed into a dimensional model and
     saved to disk in parquet format.
     """
+
+    # get filepath for song data files
+    input_data = os.path.join(input_data, 'song_data/*/*/*/*.json')
+    logger.info(f'Input data path: {input_data}')
 
     # read json data into a spark dataframe
     df = spark.stage_json_data(input_data=input_data,
@@ -86,6 +95,10 @@ def process_log_data(spark, input_data, output_data):
     staged in Spark DataFrames, transformed into a dimensional model and
     saved to disk in parquet format.
     """
+
+    # get filepath for log data files
+    input_data = os.path.join(input_data, 'log_data/*/*/*.json')
+    logger.info(f'Input data path: {input_data}')
 
     # read json data into a spark dataframe
     df = spark.stage_json_data(input_data=input_data,
@@ -132,19 +145,14 @@ def process_log_data(spark, input_data, output_data):
 def main():
 
     spark = SparkOperator()
-    # input_data = "s3a://udacity-dend/"
-    # output_data = ""
-
-    log_data = get_filepaths(filepath='data/log-data', extension='json')
-    song_data = get_filepaths(filepath='data/song-data', extension='json')
-    output_data = os.path.join(os.getcwd(), 'sparkify-warehouse')
+    output_data = os.path.join(S3_OUTPUT_DATA, S3_DATA_LAKE)
 
     process_song_data(spark=spark,
-                      input_data=song_data,
+                      input_data=S3_INPUT_DATA,
                       output_data=output_data)
 
     process_log_data(spark=spark,
-                     input_data=log_data,
+                     input_data=S3_INPUT_DATA,
                      output_data=output_data)
 
 

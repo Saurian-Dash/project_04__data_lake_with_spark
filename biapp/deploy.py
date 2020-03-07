@@ -21,9 +21,7 @@ def main():
     # setup aws infrastructure
     s3.create_bucket(bucket_name=S3_CODE_PATH)
     s3.create_bucket(bucket_name=S3_OUTPUT_DATA)
-    s3.deploy_code(
-        bucket=S3_CODE_PATH
-    )
+    s3.deploy_code(bucket=S3_CODE_PATH)
     emr.create_emr_cluster()
 
 

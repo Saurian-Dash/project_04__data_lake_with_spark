@@ -6,8 +6,6 @@ from biapp.settings.config import (
     AWS_ROLE,
     EMR_CONFIG,
     S3_CODE_PATH,
-    S3_INPUT_DATA,
-    S3_OUTPUT_DATA,
 )
 
 logger = log.setup_custom_logger(__name__)
@@ -20,6 +18,13 @@ class EMROperator:
         self.client = self.create_emr_client()
 
     def create_emr_client(self):
+        """
+        Creates a boto3 emr client which enables the application to interact
+        with emr services on AWS.
+
+        Returns:
+            boto3.client
+        """
 
         client = boto3.client('emr', region_name=AWS_REGION)
         logger.info('Client created')
@@ -27,7 +32,12 @@ class EMROperator:
         return client
 
     def create_emr_cluster(self, config=EMR_CONFIG):
-
+        """
+        Creates an EMR cluster with the specified configuration dictionary to
+        run the ETL jobs. Upon success or failure, the cluster will terminate
+        and logs will be written to the S3 bucket specified in the application
+        config files.
+        """
         response = self.client.run_job_flow(
             Name='spark-emr-cluster',
             ReleaseLabel='emr-5.28.0',
@@ -35,7 +45,7 @@ class EMROperator:
             Applications=[
                 {
                     'Name': 'Spark'
-                },
+                }
             ],
             Configurations=[
                 {
@@ -44,7 +54,8 @@ class EMROperator:
                         {
                             "Classification": "export",
                             "Properties": {
-                                "PYSPARK_PYTHON": "/usr/bin/python3"
+                                "PYSPARK_PYTHON": "/usr/bin/python3",
+                                "PYSPARK_DRIVER_PYTHON": "/usr/bin/python3"
                             }
                         }
                     ]
@@ -72,7 +83,7 @@ class EMROperator:
             },
             Steps=[
                 {
-                    'Name': 'Setup Debugging',
+                    'Name': 'Setup debugging',
                     'ActionOnFailure': 'TERMINATE_CLUSTER',
                     'HadoopJarStep': {
                         'Jar': 'command-runner.jar',
@@ -80,7 +91,15 @@ class EMROperator:
                     }
                 },
                 {
-                    'Name': 'Setup - copy files',
+                    'Name': 'Install Python packages',
+                    'ActionOnFailure': 'CONTINUE',
+                    'HadoopJarStep': {
+                        'Jar': 'command-runner.jar',
+                        'Args': ['sudo', 'pip-3.6', 'install', 'boto3']
+                    }
+                },
+                {
+                    'Name': 'Copy files from S3',
                     'ActionOnFailure': 'CANCEL_AND_WAIT',
                     'HadoopJarStep': {
                         'Jar': 'command-runner.jar',
@@ -95,15 +114,13 @@ class EMROperator:
                     }
                 },
                 {
-                    'Name': 'Run Spark',
+                    'Name': 'Run Spark ETL job',
                     'ActionOnFailure': 'CANCEL_AND_WAIT',
                     'HadoopJarStep': {
                         'Jar': 'command-runner.jar',
                         'Args': [
                             'spark-submit',
-                            '/home/hadoop/app.py',
-                            S3_INPUT_DATA,
-                            S3_OUTPUT_DATA
+                            '/home/hadoop/run.py'
                         ]
                     }
                 }
@@ -113,6 +130,6 @@ class EMROperator:
             ServiceRole=AWS_ROLE
         )
 
-        logger.info(f"Cluster ID: {response['JobFlowId']} created")
+        logger.info(f"""Cluster ID: '{response["JobFlowId"]}' created""")
 
         return response

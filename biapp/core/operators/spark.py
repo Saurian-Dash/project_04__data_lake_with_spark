@@ -55,16 +55,25 @@ class SparkOperator:
             .config(
                 'spark.jars.packages',
                 'org.apache.hadoop:hadoop-aws:2.7.5',
-            ).getOrCreate())
+            )
+            .config(
+                'spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version',
+                '2',
+            )
+            .config(
+                'spark.hadoop.fs.s3a.impl',
+                'org.apache.hadoop.fs.s3a.S3AFileSystem'
+            )
+            .config('spark.hadoop.fs.s3a.multiobjectdelete.enable', 'false')
+            .config('spark.hadoop.fs.s3a.fast.upload', 'true')
+            .config('spark.sql.parquet.filterPushdown', 'true')
+            .config('spark.sql.parquet.mergeSchema', 'false')
+            .config('spark.speculation', 'false')
+            .getOrCreate())
 
         session.conf.set(
             'spark.sql.legacy.allowCreatingManagedTableUsingNonemptyLocation',
             'true',
-        )
-
-        session._jsc.hadoopConfiguration().set(
-            'mapreduce.fileoutputcommitter.algorithm.version',
-            '2',
         )
 
         return session
@@ -173,5 +182,5 @@ class SparkOperator:
         logger.info(
             f'Table: {table_name}'
             f' | partioned by: {partition}'
-            f' | written to: {output_path}'
+            f' | written to: {output_path}/{table_name}'
         )
