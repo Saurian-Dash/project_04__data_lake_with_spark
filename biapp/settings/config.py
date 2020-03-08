@@ -35,3 +35,4 @@ S3_OUTPUT_DATA = config.get('S3_DATA', 'S3_OUTPUT_DATA')
 # s3 infrastructure
 S3_CODE_BUCKET = config.get('S3_INFRA', 'S3_CODE_BUCKET')
 S3_DATA_LAKE = config.get('S3_INFRA', 'S3_DATA_LAKE')
+S3_LOGS = config.get('S3_INFRA', 'S3_LOGS')

@@ -1,7 +1,7 @@
 from biapp.core.operators.emr import EMROperator
 from biapp.core.operators.iam import IAMOperator
 from biapp.core.operators.s3 import S3Operator
-from biapp.settings.config import S3_CODE_BUCKET, S3_DATA_LAKE
+from biapp.settings.config import S3_CODE_BUCKET, S3_DATA_LAKE, S3_LOGS
 
 
 def main():
@@ -18,6 +18,7 @@ def main():
     # deploy aws infrastructure
     s3.create_bucket(bucket=S3_CODE_BUCKET)
     s3.create_bucket(bucket=S3_DATA_LAKE)
+    s3.create_bucket(bucket=S3_LOGS)
     s3.deploy_code(bucket=S3_CODE_BUCKET)
     emr.create_emr_cluster()
 
