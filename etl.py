@@ -16,7 +16,6 @@ from biapp.core.queries.sql import (
 )
 from biapp.core.schema.json import schema_log_data, schema_song_data
 from biapp.settings.config import (
-    S3_DATA_LAKE,
     S3_INPUT_DATA,
     S3_OUTPUT_DATA
 )
@@ -84,7 +83,7 @@ def process_song_data(spark, input_data, output_data):
     spark.execute_sql(df=clean_df,
                       query=profile_query(key='song_id')).show(1)
 
-    # write songs table to parquet files partitioned by year and artist
+    # write songs table to parquet files
     spark.write_parquet_files(df=clean_df,
                               output_path=output_data,
                               table_name='dim_songs',
@@ -157,7 +156,7 @@ def process_log_data(spark, input_data, output_data):
     spark.execute_sql(df=clean_df,
                       query=songplay_test_query()).show(1)
 
-    # write fact table to parquet files partitioned by year, month and day
+    # write fact table to parquet files
     spark.write_parquet_files(df=clean_df,
                               output_path=output_data,
                               table_name='fact_songplays',
@@ -167,15 +166,14 @@ def process_log_data(spark, input_data, output_data):
 def main():
 
     spark = SparkOperator()
-    output_data = os.path.join(S3_OUTPUT_DATA, S3_DATA_LAKE)
 
     process_song_data(spark=spark,
                       input_data=S3_INPUT_DATA,
-                      output_data=output_data)
+                      output_data=S3_OUTPUT_DATA)
 
     process_log_data(spark=spark,
                      input_data=S3_INPUT_DATA,
-                     output_data=output_data)
+                     output_data=S3_OUTPUT_DATA)
 
 
 if __name__ == "__main__":
