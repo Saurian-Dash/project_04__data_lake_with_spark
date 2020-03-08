@@ -24,7 +24,7 @@ ___
 - You should see a "Success" message and an option to **Download .csv**. Ensure you download the .csv file and store it securely, it is not possible to retrieve the IAM user credentials beyond this point.
 
 ### Security Considerations
-To avoid the risk of a data breach, no AWS access credentials are stored in this application's configuration files. The application references credentials configured via the AWS CLI installed on the user's machine so they are not exposed during operation.
+To avoid the risk of a data breach, no AWS access credentials are stored in this application's configuration files. Instead, the application references credentials configured via the AWS CLI installed on the user's machine to ensure they are not exposed during operation.
 
 ### Install AWS CLI
 - [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html)
@@ -34,19 +34,21 @@ To avoid the risk of a data breach, no AWS access credentials are stored in this
 - Run `aws configure` in the terminal and enter the IAM user access keys from the .csv file downloaded previously. Further instructions can be found [here](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html).
 
 ### Update Application Config File
-The application automatically creates all AWS infrastructure required for the ETL operation according to the settings stored in `biapp/settings/envs.cfg`. Open the `envs.cfg` file in a text editor and update the settings as follows:
+The application automatically creates all AWS infrastructure required for the ETL operation according to the settings stored in `biapp/settings/envs.cfg`.
 
-**EMR_LOG_URI**: This is the S3 bucket URI the EMR cluster will write log files to, update the value using the following convention: `s3://aws-logs-<UNIQUE BUCKET NAME>-<AWS REGION>/`.
-- Example: `s3://aws-logs-123456789123-us-west-2`
+Open the `envs.cfg` file in a text editor and update the settings as follows:
 
-**S3_CODE_BUCKET**: Enter the name of the S3 bucket the application will deploy to. As bucket names are shared by all AWS users, ensure that a unique name is entered here in kebab-case style.
-- Example: `my-code-bucket`.
+- **EMR_LOG_URI**: This is the S3 bucket URI the EMR cluster will write log files to, update the value using the following convention: `s3://aws-logs-<UNIQUE BUCKET NAME>-<AWS REGION>/`.
+- - Example: `s3://aws-logs-123456789123-us-west-2`
 
-**S3_DATA_LAKE**: Enter the unique, kebab-case name of the S3 bucket to save the output of the ETL operation to.
-- Example: `my-data-lake`
+- **S3_CODE_BUCKET**: Enter the name of the S3 bucket the application will deploy to. As bucket names are shared by all AWS users, ensure that a unique name is entered here in kebab-case style.
+- - Example: `my-code-bucket`.
 
-**S3_OUTPUT_DATA**: This is the S3 URI the results of the ETL operation will be saved to. This should be the bucket name assigned to the `S3_DATA_LAKE` setting with an `s3a://` prefix:
-- Example: `s3a://my-data-lake`.
+- **S3_DATA_LAKE**: Enter the unique, kebab-case name of the S3 bucket to save the output of the ETL operation to.
+- - Example: `my-data-lake`
+
+- **S3_OUTPUT_DATA**: This is the S3 URI the results of the ETL operation will be saved to. This should be the bucket name assigned to the `S3_DATA_LAKE` setting with an `s3a://` prefix:
+- - Example: `s3a://my-data-lake`.
 
 Save the `envs.cfg` file and close.
 ___
