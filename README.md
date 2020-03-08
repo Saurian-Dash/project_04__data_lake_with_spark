@@ -38,13 +38,17 @@ The application automatically creates all AWS infrastructure required for the ET
 
 Open the `envs.cfg` file in a text editor and update the settings as follows:
 
-- **EMR_LOG_URI**: This is the S3 bucket URI the EMR cluster will write log files to, update the value using the following convention: `s3://aws-logs-<UNIQUE BUCKET NAME>-<AWS REGION>/`, eg: `s3://aws-logs-123456789123-us-west-2`
+#### Configuration Settings
 
-- **S3_CODE_BUCKET**: Enter the name of the S3 bucket the application will deploy to. As bucket names are shared by all AWS users, ensure that a unique name is entered here in kebab-case style, eg: `my-code-bucket`.
+- **S3_CODE_BUCKET**: Enter the unique, kebab-case name of the S3 bucket to deploy the application to. As S3 bucket names are shared by all AWS users, ensure that a unique name is entered here in kebab-case style, eg: `my-code-bucket`.
 
 - **S3_DATA_LAKE**: Enter the unique, kebab-case name of the S3 bucket to save the output of the ETL operation to, eg: `my-data-lake`
 
-- **S3_OUTPUT_DATA**: This is the S3 URI the results of the ETL operation will be saved to. This should be the bucket name assigned to the `S3_DATA_LAKE` setting with an `s3a://` prefix, eg: `s3a://my-data-lake`.
+- **S3_OUTPUT_DATA**: This is the URI of the S3 bucket the results of the ETL operation will be saved to, use the same bucket name assigned to the `S3_DATA_LAKE` setting with an `s3a://` prefix, eg: `s3a://my-data-lake`.
+
+- **S3_LOGS**: Enter the unique, kebab-case name of the S3 bucket to save the EMR cluster logs to, eg: `my-emr-cluster-logs`.
+
+- **EMR_LOG_URI**: This is the URI of the S3 bucket the EMR cluster logs will be saved to, use the same bucket name assigned to the `S3_LOGS` setting with an `s3a://` prefix, eg: `s3a://my-emr-cluster-logs`.
 
 Save the `envs.cfg` file and close.
 ___
