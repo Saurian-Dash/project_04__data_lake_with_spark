@@ -38,17 +38,13 @@ The application automatically creates all AWS infrastructure required for the ET
 
 Open the `envs.cfg` file in a text editor and update the settings as follows:
 
-- **EMR_LOG_URI**: This is the S3 bucket URI the EMR cluster will write log files to, update the value using the following convention: `s3://aws-logs-<UNIQUE BUCKET NAME>-<AWS REGION>/`.
-- Example: `s3://aws-logs-123456789123-us-west-2`
+- **EMR_LOG_URI**: This is the S3 bucket URI the EMR cluster will write log files to, update the value using the following convention: `s3://aws-logs-<UNIQUE BUCKET NAME>-<AWS REGION>/`, eg: `s3://aws-logs-123456789123-us-west-2`
 
-- **S3_CODE_BUCKET**: Enter the name of the S3 bucket the application will deploy to. As bucket names are shared by all AWS users, ensure that a unique name is entered here in kebab-case style.
-- Example: `my-code-bucket`.
+- **S3_CODE_BUCKET**: Enter the name of the S3 bucket the application will deploy to. As bucket names are shared by all AWS users, ensure that a unique name is entered here in kebab-case style, eg: `my-code-bucket`.
 
-- **S3_DATA_LAKE**: Enter the unique, kebab-case name of the S3 bucket to save the output of the ETL operation to.
-- Example: `my-data-lake`
+- **S3_DATA_LAKE**: Enter the unique, kebab-case name of the S3 bucket to save the output of the ETL operation to, eg: `my-data-lake`
 
-- **S3_OUTPUT_DATA**: This is the S3 URI the results of the ETL operation will be saved to. This should be the bucket name assigned to the `S3_DATA_LAKE` setting with an `s3a://` prefix:
-- Example: `s3a://my-data-lake`.
+- **S3_OUTPUT_DATA**: This is the S3 URI the results of the ETL operation will be saved to. This should be the bucket name assigned to the `S3_DATA_LAKE` setting with an `s3a://` prefix, eg: `s3a://my-data-lake`.
 
 Save the `envs.cfg` file and close.
 ___
@@ -68,7 +64,7 @@ This application will create the AWS infrastructure required to run the Sparkify
 
 1. Roles and policies are created to enable cross service access between our EMR cluster (compute) and S3 data lake (storage).
 2. S3 buckets are created to store the application code and the result of the ETL operation.
-3. An EMR cluster is spun up and the application is copied to the master node's local disk.
+3. An EMR cluster is spun up and the application is copied from S3 to the master node's local disk.
 4. Jobs are assigned to the EMR cluster and the master node executes the application code.
 5. The ETL process reads data from S3, transforms it into a set of dimensional tables and writes the result back to S3.
 
