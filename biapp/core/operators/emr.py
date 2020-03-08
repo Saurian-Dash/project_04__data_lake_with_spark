@@ -54,8 +54,7 @@ class EMROperator:
                         {
                             "Classification": "export",
                             "Properties": {
-                                "PYSPARK_PYTHON": "/usr/bin/python3",
-                                "PYSPARK_DRIVER_PYTHON": "/usr/bin/python3"
+                                "PYSPARK_PYTHON": "/usr/bin/python3"
                             }
                         }
                     ]
@@ -120,7 +119,7 @@ class EMROperator:
                         'Jar': 'command-runner.jar',
                         'Args': [
                             'spark-submit',
-                            '/home/hadoop/run.py'
+                            '/home/hadoop/etl.py'
                         ]
                     }
                 }

@@ -16,9 +16,9 @@ class SparkOperator:
 
     def clean_dataframe(self, df, *args, **kwargs):
         """
-        Data cleaning function which removes leading and trailing whitespace
-        from DataFrame values, replacing empty strings with Python None. The
-        resulting clean DataFrame is returned as a new DataFrame.
+        Removes leading and trailing whitespace from DataFrame values and
+        replaces empty strings with None. The resulting clean DataFrame is
+        returned as a new DataFrame.
 
         Args:
             df (pyspark.DataFrame):
@@ -41,10 +41,7 @@ class SparkOperator:
 
     def create_spark_session(self, *args, **kwargs):
         """
-        Creates a SparkSession and attaches it to self. The SparkSession
-        enables the application to create and manipulate Spark DataFrames,
-        keeping track of any tables or temporary views created within the
-        session.
+        Creates a PySpark SparkSession configured to run on AWS EMR.
 
         Returns:
             pyspark.SparkSession
@@ -61,31 +58,22 @@ class SparkOperator:
                 '2',
             )
             .config(
-                'spark.hadoop.fs.s3a.impl',
-                'org.apache.hadoop.fs.s3a.S3AFileSystem'
+                'spark.sql.legacy'
+                '.allowCreatingManagedTableUsingNonemptyLocation',
+                'true',
             )
-            .config('spark.hadoop.fs.s3a.multiobjectdelete.enable', 'false')
-            .config('spark.hadoop.fs.s3a.fast.upload', 'true')
-            .config('spark.sql.parquet.filterPushdown', 'true')
-            .config('spark.sql.parquet.mergeSchema', 'false')
-            .config('spark.speculation', 'false')
             .getOrCreate())
-
-        session.conf.set(
-            'spark.sql.legacy.allowCreatingManagedTableUsingNonemptyLocation',
-            'true',
-        )
 
         return session
 
     def execute_sql(self, df, query, *args, **kwargs):
         """
-        Creates a temporary view of the input DataFrame and executes a SQL
-        query on it. The query results are returned as a new DataFrame.
+        Creates a temporary view of the input DataFrame and executes an SQL
+        query on it, returning the result as a new DataFrame.
 
         Args:
             df (pyspark.DataFrame):
-                The Spark DataFrame to query.
+                The PySpark DataFrame to query with SQL.
 
             query (str):
                 The SQL query to execute on the DataFrame.
@@ -108,15 +96,13 @@ class SparkOperator:
                         *args,
                         **kwargs):
         """
-        Reads input data files from the specified path with the specified file
-        extension into a Spark DataFrame. The specified SQL query is excuted
-        to clean the DataFrame and the result is returned as a new DataFrame.
+        Reads input data files with the specified path and extension into a
+        PySpark DataFrame. The specified SQL query is excuted to clean the
+        data and the result is returned as a new DataFrame.
 
         Args:
             input_data (str) | (list):
-                Input filepath or directory path containg the input data, you
-                may pass in the path to a single file or a path to a directory
-                containing many files.
+                Input filepath or directory path containg the input data.
 
             schema (pyspark.StuctType):
                 Spark schema describing the structure of the input data.
@@ -125,7 +111,7 @@ class SparkOperator:
                 Spark SQL query to execute to clean the input data.
 
             table_name (str):
-                The name of the table to stage in a temporary view.
+                The name of the resulting clean table.
 
         Returns:
             pyspark.DataFrame
@@ -148,18 +134,18 @@ class SparkOperator:
                             **kwargs):
         """
         Writes a DataFrame to the specified path as parquet files, partitioned
-        by the specified columns. If no partition is provided, the Dataframe
-        will be coalesced to a single file.
+        by the specified columns. If no partition is provided, the output will
+        be coalesced to a single partition.
 
         Args:
             df (pyspark.Dataframe):
-                The Spark DataFrame to write to parquet.
+                The Spark DataFrame to write to parquet files.
 
             output_path (str):
-                The filepath for written parquet files.
+                The filepath for output parquet files.
 
             table_name (str):
-                The name of the DataFrame to save.
+                The name of the DataFrame to write to parquet files
 
             partition (tuple):
                 DataFrame columns to partition the parquet files.

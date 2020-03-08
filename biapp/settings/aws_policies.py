@@ -1,10 +1,5 @@
-S3_FULL_ACCESS = {
-  'name': 'AmazonS3FullAccess',
-  'arn': 'arn:aws:iam::aws:policy/AmazonS3FullAccess',
-}
-
 EMR_FULL_ACCESS = {
-  'name': 'AmazonElasticMapReduceFullAccess ',
+  'name': 'AmazonElasticMapReduceFullAccess',
   'arn': 'arn:aws:iam::aws:policy/AmazonElasticMapReduceFullAccess',
 }
 

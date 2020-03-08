@@ -15,30 +15,42 @@ class S3Operator:
         self.client = self.create_s3_client()
 
     def create_s3_client(self):
-
+        """
+        Creates a client with the AWS credentials configured in the AWS CLI.
+        """
         client = boto3.client('s3', region_name=AWS_REGION)
-
         logger.info('Client created')
+
         return client
 
-    def create_bucket(self, bucket_name):
+    def create_bucket(self, bucket):
+        """
+        Creates an S3 bucket with the specified name in the AWS region
+        specified in the application config files.
+        """
 
         try:
-            response = self.client.create_bucket(
-                Bucket=bucket_name,
+            self.client.create_bucket(
+                Bucket=bucket,
                 CreateBucketConfiguration={'LocationConstraint': AWS_REGION}
             )
-
-            logger.info(f'{bucket_name} created')
-            return response
+            logger.info(f'{bucket} created')
 
         except self.client.exceptions.BucketAlreadyOwnedByYou:
             logger.info(
-                f"'{bucket_name}' already exists!"
+                f"'{bucket}' already exists!"
             )
 
     def deploy_code(self, bucket):
+        """
+        Deploys the application code to the specified S3 bucket. When the
+        EMR cluster is created, the code is copied from the S3 bucket to the
+        local disk of the master node and executed there.
 
+        Args:
+            bucket (str):
+                The name of the S3 bucket to deploy the application to.
+        """
         directory = f'{os.path.join(os.getcwd())}{os.sep}'
         extensions = ('cfg', 'py')
 
@@ -59,14 +71,26 @@ class S3Operator:
                             bucket,
                             s3_path,
                         )
-
                         logger.info(f'{s3_path} written to S3')
 
-        except Exception as err:
-            raise(err)
+        except Exception as e:
+            raise(e)
 
     def list_bucket(self, bucket, prefix=''):
+        """
+        Returns a list of all object keys in the specified S3 bucket with
+        the specified prefix.
 
+        Args:
+            bucket (str):
+                The name of the S3 bucket containing the objects to list.
+
+            prefix (str):
+                Object key prefix to filter the results by.
+
+        Returns:
+            list
+        """
         response = self.client.list_objects_v2(
             Bucket=bucket,
             Delimiter='',

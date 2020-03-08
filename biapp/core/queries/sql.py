@@ -59,13 +59,22 @@ def create_dim_artists():
     name = 'create_dim_artists'
     sql = (
         """
-        SELECT DISTINCT artist_id        AS artist_id,
-                        artist_name      AS artist_name,
-                        artist_location  AS location,
-                        artist_latitude  AS latitude,
-                        artist_longitude AS longitude
-        FROM stage
-        WHERE artist_id IS NOT NULL
+        WITH t1 AS (
+            SELECT *,
+            ROW_NUMBER() OVER (
+                PARTITION BY artist_id
+                ORDER BY year DESC
+            ) AS rn
+            FROM stage
+        )
+        SELECT artist_id        AS artist_id,
+               artist_name      AS artist_name,
+               artist_location  AS location,
+               artist_latitude  AS latitude,
+               artist_longitude AS longitude
+        FROM t1
+        WHERE t1.artist_id IS NOT NULL
+              AND t1.rn = 1
         ORDER BY 1
         """
     )

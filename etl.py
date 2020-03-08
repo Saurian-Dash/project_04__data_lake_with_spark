@@ -27,11 +27,15 @@ logger = log.setup_custom_logger(__name__)
 
 def get_filepaths(filepath, extension):
     """
-    Walks over a directory and returns a list of filepaths matching the
-    specified extension.
+    Walks over the specified directory and returns a list of filepaths
+    matching the specified extension.
 
     Args:
-        filepath (str): The directory containing the filepaths to list.
+        filepath (str):
+            The directory containing the filepaths to list.
+
+        extension (str):
+            File extension to filter the results by.
 
     Returns:
         list
@@ -50,7 +54,17 @@ def process_song_data(spark, input_data, output_data):
     """
     ETL operation for the Sparkify song data. JSON data is loaded from S3,
     staged in Spark DataFrames, transformed into a dimensional model and
-    saved to disk in parquet format.
+    saved back to S3 as parquet files.
+
+    Args:
+        spark (pyspark.SparkSession):
+            A PySpark session configured to run on AWS EMR.
+
+        input_data (str):
+            The URI of the S3 bucket containing the input files.
+
+        output_data (str):
+            The URI of the S3 bucket to write output files.
     """
 
     # get filepath for song data files
@@ -76,7 +90,7 @@ def process_song_data(spark, input_data, output_data):
                               table_name='dim_songs',
                               partition=('year', 'artist_name'))
 
-    # run sql query to artists dimension
+    # run sql query to create artists dimension
     clean_df = spark.execute_sql(df=df, query=create_dim_artists())
 
     # profiling query: check for duplicate artist_id
@@ -93,12 +107,21 @@ def process_log_data(spark, input_data, output_data):
     """
     ETL operation for the Sparkify log data. JSON data is loaded from S3,
     staged in Spark DataFrames, transformed into a dimensional model and
-    saved to disk in parquet format.
+    saved back to S3 as parquet files.
+
+    Args:
+        spark (pyspark.SparkSession):
+            A PySpark session configured to run on AWS EMR.
+
+        input_data (str):
+            The URI of the S3 bucket containing the input files.
+
+        output_data (str):
+            The URI of the S3 bucket to write output files.
     """
 
     # get filepath for log data files
     input_data = os.path.join(input_data, 'log_data/*/*/*.json')
-    logger.info(f'Input data path: {input_data}')
 
     # read json data into a spark dataframe
     df = spark.stage_json_data(input_data=input_data,
@@ -106,7 +129,7 @@ def process_log_data(spark, input_data, output_data):
                                query=stage_log_data(),
                                table_name='stage_log_data')
 
-    # run sql query to clean users data
+    # run sql query to create users dimension
     clean_df = spark.execute_sql(df=df, query=create_dim_users())
 
     # profiling query: check for duplicate user_id
@@ -116,10 +139,9 @@ def process_log_data(spark, input_data, output_data):
     # write users table to parquet files
     spark.write_parquet_files(df=clean_df,
                               output_path=output_data,
-                              table_name='dim_users',
-                              partition=('gender', 'level'))
+                              table_name='dim_users')
 
-    # run sql query to clean time data
+    # run sql query to create time dimension
     clean_df = spark.execute_sql(df=df, query=create_dim_time())
 
     # write time table to parquet files
@@ -128,14 +150,14 @@ def process_log_data(spark, input_data, output_data):
                               table_name='dim_time',
                               partition=('year', 'month'))
 
-    # extract columns from joined song and log datasets to create songplays
+    # run sql query to create songplays fact table
     clean_df = spark.execute_sql(df=df,  query=create_fact_songplays())
 
-    # profiling query: count populated song_id
+    # profiling query: show populated song_id (expecting one match)
     spark.execute_sql(df=clean_df,
                       query=songplay_test_query()).show(1)
 
-    # write songplays table to parquet files partitioned by year, month, day
+    # write fact table to parquet files partitioned by year, month and day
     spark.write_parquet_files(df=clean_df,
                               output_path=output_data,
                               table_name='fact_songplays',
