@@ -5,7 +5,7 @@ from biapp.settings.config import (
     AWS_REGION,
     AWS_ROLE,
     EMR_CONFIG,
-    S3_CODE_PATH,
+    S3_CODE_BUCKET,
 )
 
 logger = log.setup_custom_logger(__name__)
@@ -106,7 +106,7 @@ class EMROperator:
                             'aws',
                             's3',
                             'cp',
-                            f's3://{S3_CODE_PATH}',
+                            f's3://{S3_CODE_BUCKET}',
                             '/home/hadoop/',
                             '--recursive'
                         ]
