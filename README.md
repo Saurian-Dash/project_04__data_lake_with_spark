@@ -1,5 +1,5 @@
 # Sparkify Data Lake
-#### A data lake and dimensional data model hosted on AWS
+#### A dimensional data model hosted on AWS
 
 Sparkify Data Lake is an application which reads song and event data from S3, transforms them into a dimension model then saves the results back to S3 as parquet files.. The dimension model will allow Sparkify (a fictional music streaming app) to slice their event data by dimensions (categories) to discover new insights and trends.
 ___
