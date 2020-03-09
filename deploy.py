@@ -1,7 +1,7 @@
-from biapp.core.operators.emr import EMROperator
-from biapp.core.operators.iam import IAMOperator
-from biapp.core.operators.s3 import S3Operator
-from biapp.settings.config import S3_CODE_BUCKET, S3_DATA_LAKE, S3_LOGS
+from core.operators.emr import EMROperator
+from core.operators.iam import IAMOperator
+from core.operators.s3 import S3Operator
+from settings.config import S3_CODE_BUCKET, S3_DATA_LAKE, S3_LOGS
 
 
 def main():

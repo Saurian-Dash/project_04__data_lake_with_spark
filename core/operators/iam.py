@@ -1,12 +1,12 @@
 import boto3
 import json
 
-from biapp.core.logger import log
-from biapp.settings.aws_policies import (
+from core.logger import log
+from settings.aws_policies import (
     EMR_FULL_ACCESS,
     EMR_TRUST_RELATIONSHIP,
 )
-from biapp.settings.config import (
+from settings.config import (
     AWS_REGION,
     AWS_ROLE,
 )

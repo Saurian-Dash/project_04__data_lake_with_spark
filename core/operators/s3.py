@@ -2,8 +2,8 @@ import boto3
 import glob
 import os
 
-import biapp.core.logger.log as log
-from biapp.settings.config import AWS_REGION
+import core.logger.log as log
+from settings.config import AWS_REGION
 
 logger = log.setup_custom_logger(__name__)
 

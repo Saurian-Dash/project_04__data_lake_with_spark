@@ -3,7 +3,7 @@ import os
 from pyspark.sql import functions as f
 from pyspark.sql import SparkSession
 
-import biapp.core.logger.log as log
+import core.logger.log as log
 
 logger = log.setup_custom_logger(__name__)
 

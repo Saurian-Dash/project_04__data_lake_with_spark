@@ -1,7 +1,7 @@
 import boto3
 
-import biapp.core.logger.log as log
-from biapp.settings.config import (
+import core.logger.log as log
+from settings.config import (
     AWS_REGION,
     AWS_ROLE,
     EMR_CONFIG,

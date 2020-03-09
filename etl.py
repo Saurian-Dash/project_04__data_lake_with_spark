@@ -1,9 +1,9 @@
 import glob
 import os
 
-import biapp.core.logger.log as log
-from biapp.core.operators.spark import SparkOperator
-from biapp.core.queries.sql import (
+import core.logger.log as log
+from core.operators.spark import SparkOperator
+from core.queries.sql import (
     create_dim_artists,
     create_dim_songs,
     create_dim_time,
@@ -14,8 +14,8 @@ from biapp.core.queries.sql import (
     stage_log_data,
     stage_song_data,
 )
-from biapp.core.schema.json import schema_log_data, schema_song_data
-from biapp.settings.config import (
+from core.schema.json import schema_log_data, schema_song_data
+from settings.config import (
     S3_INPUT_DATA,
     S3_OUTPUT_DATA
 )
