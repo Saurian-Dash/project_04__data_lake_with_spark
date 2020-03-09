@@ -121,6 +121,7 @@ def process_log_data(spark, input_data, output_data):
 
     # get filepath for log data files
     input_data = os.path.join(input_data, 'log_data/*/*/*.json')
+    logger.info(f'Input data path: {input_data}')
 
     # read json data into a spark dataframe
     df = spark.stage_json_data(input_data=input_data,
