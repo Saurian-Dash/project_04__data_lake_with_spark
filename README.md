@@ -30,7 +30,7 @@ To avoid the risk of a data breach, no AWS access credentials are stored in this
 - Run `aws configure` in the terminal and enter the IAM user access keys from the .csv file downloaded previously. Further instructions can be found [here](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html).
 
 ### Update Application Config File
-The application automatically creates all AWS infrastructure required for the ETL operation according to the settings stored in `biapp/settings/envs.cfg`.
+The application automatically creates all AWS infrastructure required for the ETL operation according to the settings stored in `settings/envs.cfg`.
 
 Open the `envs.cfg` file in a text editor and update the settings as follows:
 
