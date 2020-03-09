@@ -6,6 +6,10 @@ ___
 
 ## Setup Instructions
 
+### Requirements
+- Python version 3.6 or higher
+- An AWS IAM user with permission to read from and write to S3.
+
 ### Create an IAM User
 - Create an AWS account with full access to AWS services.
 - Sign in to the [IAM console](https://console.aws.amazon.com/iam/) with your AWS credentials.
